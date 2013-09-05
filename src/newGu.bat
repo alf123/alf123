@@ -1,0 +1,2 @@
+python newGu.py
+pause
