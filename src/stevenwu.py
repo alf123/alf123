@@ -20,7 +20,10 @@ class alf123:
         today = datetime.date.today()
         self.sID = sID
         self.opp = onePiece
-
+        self.historyDB = Base("F://alfStock//"+"alf123"+'.history')
+        self.currentDB = Base("F://alfStock//"+"alf123"+'.current')
+        self.historyDB.open()
+        self.currentDB.open()
         db = Base("F://alfStock//"+str(today)+'.db')
         impactDB = Base("F://alfStock//"+str(today)+'.yv')
         if db.exists():
@@ -156,6 +159,31 @@ class alf123:
             self.idb.insert(self.sID, UpOrDown)
             self.idb.commit()
 
+    def UpStill(self):
+        existOrNot = [e for e in self.idb if e['sid']== self.sID]
+        leng = 0
+        if len(existOrNot)>0:
+            pass
+        else:
+            record = [r for r in self.currentDB if r['sid'] == self.sID]
+            if len(record)>0:
+                k = record[0]['length']
+                leng = k+1
+                self.currentDB.update(record[0],length=leng)
+                self.currentDB.commit()
+            else:
+                UpStill
+                leng = 1
+                self.currentDB.insert(sid = self.sID,Edate = datetime.date.today(),length=leng)
+                self.currentDB.commit()
+        return leng
+    def DownStill(self):
+        record = [r for r in self.currentDB if r['sid'] == self.sID]
+        if len(record)>0:
+            self.historyDB.insert(sid = self.sID, Edate = record[0]['Edate'], length = record[0]['length'])
+            self.historyDB.commit()
+            self.currentDB.delete(record[0])
+            self.currentDB.commit()
     def test(self, lf):
         #http://finance.yahoo.com/q/ta?s=5603.TWO&t=1y&l=on&z=l&q=l&p=b&a=&c=
         print "-----------test start ---------------------------------------"
@@ -163,13 +191,15 @@ class alf123:
         conf2 = [10,10]
         st = ""
         if (float(self.sCurrent[0]) > self.Up(conf)) and ( (self.Up(conf)-self.Dn(conf))/(self.MB(conf[0])+0.00000001) < 0.1):
+            fuNum = self.UpStill()
             if self.opp == "TW":
-                st = ",['"+self.sCurrent[1] +".TW',   {v: 8000,   f: '$" + str(self.sCurrent[0])+"'},  true]"
+                st = ",['"+self.sCurrent[1] +".TW',   {v: 8000,   f: '$" + str(self.sCurrent[0])+"'},  "+fuNum+"]"
                 self.insertIDB("U")
             else:
-                st = ",['"+self.sCurrent[1] +".TWO',   {v: 8000,   f: '$" + str(self.sCurrent[0])+"'},  true]"
+                st = ",['"+self.sCurrent[1] +".TWO',   {v: 8000,   f: '$" + str(self.sCurrent[0])+"'},  "+fuNum+"]"
                 self.insertIDB("U")
         if float(self.sCurrent[0]) < self.Dn(conf):
+            self.DownStill()
             if self.opp == "TW":
                 st = ""#",['"+self.sCurrent[1] +".TW',   {v: 8000,   f: '$" + str(self.sCurrent[0])+"'},  false]"
                 self.insertIDB("D")

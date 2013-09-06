@@ -25,7 +25,7 @@ today = datetime.date.today()
 
 def resetHisDB():
     historyDB = Base("F://alfStock//"+"alf123"+'.history')
-    historyDB.create('sid','Edate', 'length')
+    historyDB.create('sid','Edate', 'length')#Edate := started day not end day
     historyDB.open()
     historyDB.commit()
     currentDB = Base("F://alfStock//"+"alf123"+'.current')
@@ -38,4 +38,3 @@ def UpStill(entry):
     if len(r)>0:
         k = record['length']
         currentDB.update(record,length=k+1)
-resetHisDB()
