@@ -160,7 +160,8 @@ class alf123:
             self.idb.commit()
 
     def UpStill(self):
-        existOrNot = [e for e in self.idb if e['sid']== self.sID]
+        self.idb.open()
+        existOrNot = [r for r in self.idb if r['sid']== self.sID]
         leng = 0
         if len(existOrNot)>0:
             pass
@@ -172,7 +173,6 @@ class alf123:
                 self.currentDB.update(record[0],length=leng)
                 self.currentDB.commit()
             else:
-                UpStill
                 leng = 1
                 self.currentDB.insert(sid = self.sID,Edate = datetime.date.today(),length=leng)
                 self.currentDB.commit()
@@ -193,10 +193,10 @@ class alf123:
         if (float(self.sCurrent[0]) > self.Up(conf)) and ( (self.Up(conf)-self.Dn(conf))/(self.MB(conf[0])+0.00000001) < 0.1):
             fuNum = self.UpStill()
             if self.opp == "TW":
-                st = ",['"+self.sCurrent[1] +".TW',   {v: 8000,   f: '$" + str(self.sCurrent[0])+"'},  "+fuNum+"]"
+                st = ",['"+self.sCurrent[1] +".TW',   {v: 8000,   f: '$" + str(self.sCurrent[0])+"'},  "+str(fuNum)+"]"
                 self.insertIDB("U")
             else:
-                st = ",['"+self.sCurrent[1] +".TWO',   {v: 8000,   f: '$" + str(self.sCurrent[0])+"'},  "+fuNum+"]"
+                st = ",['"+self.sCurrent[1] +".TWO',   {v: 8000,   f: '$" + str(self.sCurrent[0])+"'},  "+str(fuNum)+"]"
                 self.insertIDB("U")
         if float(self.sCurrent[0]) < self.Dn(conf):
             self.DownStill()
